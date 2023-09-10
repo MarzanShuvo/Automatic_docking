@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="r6bot">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="robot">
   <!-- helper macro -->
   <xacro:include filename="$(find charger_description)/urdf/inc/create_link.xacro"/>
 
@@ -28,7 +28,7 @@
   />
 
   <xacro:create_link
-      link_name="tag"
+      link_name="tag_203"
       xyz_offset="0 0 0"
       rpy_offset="0 0 0"
       mesh_package="charger_description"
@@ -38,9 +38,9 @@
 
   <!-- joints - main serial chain -->
   <joint name="joint_1" type="fixed">
-    <parent link="base"/>
-    <child link="bar"/>
-    <origin xyz="0.026013 0 0.235144" rpy="0 0 0"/>
+    <parent link="bar"/>
+    <child link="base"/>
+    <origin xyz="-0.026013 0 -0.235144" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
 
@@ -52,9 +52,9 @@
   </joint>
 
   <joint name="joint_3" type="fixed">
-    <parent link="bar"/>
-    <child link="tag"/>
-    <origin xyz="0.013006 0 0.257653" rpy="0 0 0"/>
+    <parent link="tag_203"/>
+    <child link="bar"/>
+    <origin xyz="-0.013006 0 -0.257653" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
   </joint>
 
