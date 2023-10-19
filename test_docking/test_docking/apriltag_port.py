@@ -137,13 +137,13 @@ class Docking(Node):
                 print("pid_output ", pid_output)
                 self.saved_time = current_time
                 if(pid_output>0.3):
-                    self.vel.angular.z = 0.12
+                    self.vel.angular.z = 0.2
                     print("PID pos", self.vel.angular.z)
                 elif(pid_output<-0.3):
-                    self.vel.angular.z = -0.12
+                    self.vel.angular.z = -0.2
                     print("PID neg", self.vel.angular.z)
                 else:
-                    self.vel.angular.z = (pid_output*0.9)
+                    self.vel.angular.z = pid_output
                     print("PID", self.vel.angular.z)
                 
 
@@ -164,11 +164,7 @@ class Docking(Node):
 def main(args=None):
     rclpy.init(args=args)
     tag_to_bar = Docking()
-    # tag_to_bar = Docking()
-    # tag_to_bar.get_transformation_from_aptag_to_port()
-    # while get_pose.cam_to_base_link is None:
-    # get_pose.get_transform_matrix_cam_to_base_link()
-    # print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&', get_pose.transform_aptag_in_world_dict )
+    
     while( rclpy.ok()):
         tag_to_bar.get_transformation_from_aptag_to_port()
         tag_to_bar.move_towards_tag()
@@ -179,21 +175,6 @@ def main(args=None):
     tag_to_bar.destroy_node()
     rclpy.shutdown()
 
-# def main(args=None):
-#     rclpy.init(args=args)
-#     tag_to_bar = Docking()
-
-#     executor = MultiThreadedExecutor()
-#     tag_to_bar.get_transformation_from_aptag_to_port()
-#     tag_to_bar.move_towards_tag()
-#     executor.add_node(tag_to_bar)
-
-#     try:
-#         executor.spin()
-#     finally:
-#         executor.shutdown()
-
-#     rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
