@@ -27,18 +27,21 @@ class DockingActionServer(Node):
             self.docking.get_transformation_from_aptag_to_port()
             self.docking.move_towards_tag()
             
-
+        print(self.docking.bumped)
         if self.docking.bumped:
-            goal_handle.succeed()
             print("Bumped!!")
-            result = Docking.Result()
+            goal_handle.succeed()
+            result = DockingRequest.Result()
             result.result = True
+            self.docking.bumped = False
             return result
         else:
             goal_handle.abort()
-            result = Docking.Result()
+            result = DockingRequest.Result()
             result.result = False
             return result
+	
+
 def main(args=None):
     rclpy.init(args=args)
     subscriber_node = DockingActionServer()

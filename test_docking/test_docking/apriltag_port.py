@@ -66,16 +66,16 @@ class Docking(Node):
         self.vel = Twist()
         self.saved_time = self.get_clock().now()
         self.prev_error = 0
-        kp = 0.05
+        kp = 1
         ki = 0.1
-        kd = 0.3
+        kd = 0.01
         self.controller = PID(kp, kd, ki)
 
         self.translation = {}
 
     def get_transformation_from_aptag_to_port(self):
-        frame = "charger"
-        source_frame = "port"
+        frame = "port"
+        source_frame = "charger"
         try:
             transformation = self.tf_buffer.lookup_transform(source_frame, frame, rclpy.time.Time(),
                                                             timeout=rclpy.duration.Duration(seconds=2.0))
@@ -86,7 +86,7 @@ class Docking(Node):
                  "translation_z":transformation.transform.translation.z,
             }
             self.translation.update(translation_values)
-            print(self.translation)
+            print("trans:", (translation_values))
 
         except Exception as e:
             print("found problem:", e)
@@ -101,7 +101,7 @@ class Docking(Node):
         return desired_vel
 
     def proxi_callback(self, msg):
-        self.get_logger().info(f'Received float: {msg.data}')
+        #self.get_logger().info(f'Received float: {msg.data}')
         self.proxi = msg.data
         print(self.proxi)
 
@@ -127,20 +127,24 @@ class Docking(Node):
             current_error = float(self.translation.get("translation_y", 0.0))
             transition_x = float(self.translation.get("translation_x", 0.0))
             print("current_error", current_error)
-            print("x", transition_x)
+            #print("x", transition_x)
             if (transition_x>0.06 or (self.proxi is not None and self.proxi > 15.0)):
                 self.vel.linear.x = 0.1
                 current_time = self.get_clock().now()
                 dt = (current_time - self.saved_time).nanoseconds / 1e9
-                pid_output =self.velocity_control(current_error*1.2, dt, self.prev_error)
+                pid_output =self.velocity_control(current_error, dt, self.prev_error)
+                pid_output = pid_output
                 print("pid_output ", pid_output)
                 self.saved_time = current_time
                 if(pid_output>0.3):
-                    self.vel.angular.z = 0.3
-                if(pid_output<-0.3):
-                    self.vel.angular.z = -0.3
+                    self.vel.angular.z = 0.12
+                    print("PID pos", self.vel.angular.z)
+                elif(pid_output<-0.3):
+                    self.vel.angular.z = -0.12
+                    print("PID neg", self.vel.angular.z)
                 else:
-                    self.vel.angular.z = pid_output
+                    self.vel.angular.z = (pid_output*0.9)
+                    print("PID", self.vel.angular.z)
                 
 
                 self.pub.publish(self.vel)

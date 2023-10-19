@@ -35,8 +35,8 @@ def generate_launch_description():
         aptags_tf_broadcast,
         #realsense2_camera,
         charger_description,
-        # Node(
-        #     package='test_docking',
-        #     executable='apriltag_port',
-        # ),
+         Node(
+             package='test_docking',
+             executable='apriltag_port_server',
+         ),
     ])
