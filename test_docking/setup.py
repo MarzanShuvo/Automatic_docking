@@ -23,8 +23,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'apriltag_port = test_docking.apriltag_port:main',
+           # 'apriltag_port = test_docking.apriltag_port:main',
             'apriltag_port_server = test_docking.docking_server:main',
+            'apriltag_port_client = test_docking.docking_client:send_docking_goal',
+            'apriltag_port = test_docking.docking_main:main',
         ],
     },
 )

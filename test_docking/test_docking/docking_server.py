@@ -3,7 +3,7 @@ import time
 import rclpy
 from rclpy.action import ActionServer
 from rclpy.node import Node
-from test_docking.apriltag_port import Docking
+from test_docking.docking_main import Docking
 from shr_msgs.action import DockingRequest
 
 class DockingActionServer(Node):
@@ -18,7 +18,7 @@ class DockingActionServer(Node):
             'docking',
             execute_callback=self.execute_callback
         )
-        print("working action")
+        #print("working action")
     def execute_callback(self, goal_handle):
         print("working callback")
         print("working init", goal_handle)

@@ -66,10 +66,13 @@ class Docking(Node):
         self.vel = Twist()
         self.saved_time = self.get_clock().now()
         self.prev_error = 0
+        self.prev_error_x = 0
         kp = 1
         ki = 0.1
         kd = 0.01
+        kp_x = 0.6
         self.controller = PID(kp, kd, ki)
+        self.controller_x = PID(kp_x, kd, ki)
 
         self.translation = {}
 
@@ -99,6 +102,15 @@ class Docking(Node):
 
         desired_vel = np.clip(mv_p + mv_i + mv_d, -max_vel, max_vel)
         return desired_vel
+    
+    def velocity_control_X(self, error, dt, prev_error):
+        max_vel = 0.1
+        mv_p = self.controller.proportional_control(error)
+        mv_i = self.controller.integral_control(error, dt)
+        mv_d = self.controller.derivative_control(error, prev_error, dt)
+
+        desired_vel = np.clip(mv_p + mv_i + mv_d, 0.009, max_vel)
+        return desired_vel
 
     def proxi_callback(self, msg):
         #self.get_logger().info(f'Received float: {msg.data}')
@@ -126,21 +138,24 @@ class Docking(Node):
         if (self.is_detect is True and self.bumped is False):
             current_error = float(self.translation.get("translation_y", 0.0))
             transition_x = float(self.translation.get("translation_x", 0.0))
+            error_x = (transition_x-0.03)*0.9
             #print("current_error", current_error)
             #print("x", transition_x)
-            if (transition_x>0.06 or (self.proxi is not None and self.proxi > 15.0)):
-                self.vel.linear.x = 0.1
+            if (error_x>0.01 or (self.proxi is not None and self.proxi > 15.0)):
+                
                 current_time = self.get_clock().now()
                 dt = (current_time - self.saved_time).nanoseconds / 1e9
                 pid_output =self.velocity_control(current_error, dt, self.prev_error)
-                pid_output = pid_output
-                #print("pid_output ", pid_output)
+                pid_output_x = self.velocity_control_X(error_x, dt, self.prev_error_x)
+                self.vel.linear.x = pid_output_x
+                print("pid_output_x", pid_output_x)
+                print("pid_output ", pid_output)
                 self.saved_time = current_time
                 if(pid_output>0.3):
-                    self.vel.angular.z = 0.2
+                    self.vel.angular.z = 0.3
                     #print("PID pos", self.vel.angular.z)
                 elif(pid_output<-0.3):
-                    self.vel.angular.z = -0.2
+                    self.vel.angular.z = -0.3
                     #print("PID neg", self.vel.angular.z)
                 else:
                     self.vel.angular.z = pid_output
@@ -149,6 +164,7 @@ class Docking(Node):
 
                 self.pub.publish(self.vel)
                 self.prev_error = current_error
+                self.prev_error_x = error_x
                 self.bumped = False
             else:
                 self.vel.linear.x = 0.0
